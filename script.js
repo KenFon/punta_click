@@ -4,6 +4,35 @@ var forme=["carre", "rond"];
 var score=0;
 var _difficult="";
 var _timer=null;
+var _intervalId="";
+var mouve=["move_one", "move_two"];
+
+function createButton(niveau){
+		var article = document.createElement("article");
+		var a = document.createElement("a");
+		article.appendChild(a);
+	  article.classList.add("btn");
+		var span = document.createElement("span")
+		var spanUn=span.cloneNode(true);
+		var spanDeux=span.cloneNode(true);
+		var spanTrois=span.cloneNode(true);
+	  var spanQuatre=span.cloneNode(true);
+	  a.appendChild(span);
+	  a.appendChild(spanUn);
+	  a.appendChild(spanDeux);
+    a.appendChild(spanTrois);
+	 	a.appendChild(spanQuatre);
+	  document.body.appendChild(article);
+		var tabArticle=document.querySelectorAll("article");
+	  var tabSpan = article.getElementsByTagName('span');
+	 	tabSpan[0].classList.add("text");
+  	tabSpan[1].classList.add("line", "-right");
+		tabSpan[2].classList.add("line", "-left");
+		tabSpan[3].classList.add("line", "-bottom");
+	 	tabSpan[4].classList.add("line", "-top");
+		tabSpan[0].textContent=niveau;
+	   	return article;
+	}
 
 function init(){
 	var divInit = document.createElement("section");
@@ -12,29 +41,30 @@ function init(){
 	titreJeu.textContent ="Punta Click";
 	var regle = document.createElement("aside");
 	regle.classList.add("regle");
-	regle.innerHTML="Voici les régles : </br>Vous devez cliquer sur toutes les formes dans le temps impartie. Chaque elimination vous rapporte des points. </br>ATTENTION, les formes noires sont dangereuse ! Elle vous ferons perdre instantanément.</br>Si toute les formes de couleurs sont eliminer, vous remporter la partie !"
+	regle.innerHTML="<div><h2>Voici les régles : </h2></br>Vous devez cliquer sur toutes les formes dans le temps impartie. Chaque elimination vous rapporte des points. </br>ATTENTION, les formes noires sont dangereuse ! Elle vous ferons perdre instantanément.</br>Si toute les formes de couleurs sont eliminer, vous remporter la partie !</p></div>"
 	var leaderboard = document.createElement("aside");
 	leaderboard.classList.add("leaderboard");
-	//creation de la navBar
-	var nav=document.createElement("nav");
-	var buttonNoob=document.createElement("button");
-	var buttonHard=document.createElement("button");
-	var buttonUltra=document.createElement("button");
-	buttonNoob.textContent="Niveau Noob";
-	buttonHard.textContent="Niveau Difficile";
-	buttonUltra.textContent="Prepared to Loose";
+
 	//constitution de la page d'accueil
 	document.body.appendChild(divInit);
 	var start = document.body.querySelector(".start");
+	var nav=document.createElement("nav");
 	start.appendChild(titreJeu);
 	start.appendChild(regle);
 	start.appendChild(nav);
 	start.appendChild(leaderboard);
+
+	//creation de la navBar
 	var navBar = document.body.querySelector("nav")
-	navBar.appendChild(buttonNoob);
+	var buttonNoob=createButton("Niveau Noob");
+	navBar.appendChild(buttonNoob)
+	var buttonHard=createButton("Niveau Harcore");
 	navBar.appendChild(buttonHard);
+	var buttonUltra=createButton("Prepared to loose");
 	navBar.appendChild(buttonUltra);
-	var allButton = document.querySelectorAll("button");
+
+
+	var allButton = document.querySelectorAll("article");
 	allButton[0].addEventListener("click", function(){
 		_difficult="Noob";
 		game(20,3,60000);
@@ -66,7 +96,7 @@ function timeOut(){
 //Effacer les enfant de element.
 function removeAllChild(element){
 	if (element.childElementCount == 0){
-		element.remove;
+		element.remove();
 	}
 	while (element.firstChild) {
    	element.removeChild(element.firstChild);
@@ -76,24 +106,29 @@ function removeAllChild(element){
 
 //fonction qui gére la barre du timer pdt le jeu.
 function timer(sec){
-	var intervalId="";
-	intervalId=setInterval(degress, (sec/100));
+
+	var timer=99;
+	var span = document.querySelector("span")
+	_intervalId=setInterval(degress, (sec/100));
 
 	function degress(){
-		if(document.querySelector("progress") === null){
-			clearInterval(intervalId);
+		if(span === null){
+			clearInterval(_intervalId);
 		}else{
-			var timer=document.querySelector("progress").value;
-	      if( timer== 0 ){
-				clearInterval(intervalId);
+	      if( timer == 0 ){
+				clearInterval(_intervalId);
 	         return;
-	      }else{
-	         timer=timer-1;
-	         document.querySelector("progress").value=timer;
-	      }
+	      }else if (timer == 50){
+				span.parentNode.classList.remove("vert");
+				span.parentNode.classList.add("orange");
+			}else if(timer == 20){
+				span.parentNode.classList.remove("orange");
+				span.parentNode.classList.add("rouge");
+			}
+			timer=timer-1;
+	      document.querySelector("span").style="width:"+timer+"%";
 	}
 }
-
 }
 
 //creation de div en fonction de la difficulté.
@@ -118,7 +153,7 @@ function gameplay(black){
 		intervalId=setInterval(randomPosition(tabDiv[i]),1000);
 		var xy = randomPosition(tabDiv[i]);
 		tabDiv[i].classList.remove(...couleur,...forme);
-		tabDiv[i].classList.add("noir",forme[Math.floor((Math.random()*forme.length))]);
+		tabDiv[i].classList.add("noir",forme[Math.floor((Math.random()*forme.length))], mouve[Math.floor((Math.random()*mouve.length))]);
 		tabDiv[i].style.top = xy[0] + 'vh';
 		tabDiv[i].style.left = xy[1] + 'vw';
 		tabDiv[i].addEventListener("click", function(){
@@ -132,7 +167,7 @@ function gameplay(black){
 		aleaforme=Math.floor((Math.random()*forme.length));
 		tabDiv[i].classList.remove(...couleur);
 		tabDiv[i].classList.remove(...forme);
-		tabDiv[i].classList.add(couleur[aleacouleur],forme[aleaforme]);
+		tabDiv[i].classList.add(couleur[aleacouleur],forme[aleaforme],mouve[Math.floor((Math.random()*mouve.length))]);
 		//Je met les elements à un endroit aléatoire
 		xy = randomPosition(tabDiv[i]);
 		tabDiv[i].style.top = xy[0] + 'vh';
@@ -142,36 +177,41 @@ function gameplay(black){
 }
 }
 
-
-//fonction a faire. Appeler lors de la defaite
-function loose(){
+//Fonction mise en page fin de jeu
+function desingEndGame(vicdef){
 	removeAllChild(document.querySelector(".game"));
-	document.body.textContent="YOU LOOSE";
-	var button = document.createElement("button");
-	console.log(button);
-	button.textContent ="Retour au debut";
-	document.body.appendChild(button)
-	button.addEventListener("click",function(){
-		removeAllChild(document.body)
-		init()})
-
+	var secEndGame=document.createElement("section");
+	secEndGame.classList.add("secEndGame");
+	var texte=document.createElement("div");
+	texte.classList.add("textEnd")
+	texte.textContent=vicdef;
+	var boutton=createButton("Retour à l'accueil");
+	document.body.appendChild(secEndGame);
+	secEndGame.appendChild(texte);
+	secEndGame.appendChild(boutton);
+	return boutton;
 }
 
-//fonction a faire. Appeler lors de la victoire
+//Appeler lors de la defaite
+function loose(){
+	var boutton = desingEndGame("YOU LOOSE");
+	clearInterval(_intervalId);
+	boutton.addEventListener("click",function(){
+		removeAllChild(document.body)
+		init()})
+}
+
+//gére la victoire.
 function win(){
 	clearTimeout(_timer);
-	removeAllChild(document.querySelector(".game"));
-	document.body.textContent="YOU WIN";
-	var button = document.createElement("button");
-	console.log(button);
-	button.textContent ="Retour au debut";
-	document.body.appendChild(button)
+	clearInterval(_intervalId);
+	var button = desingEndGame("YOU WIN");
 	button.addEventListener("click",function(){
 		removeAllChild(document.body)
 		init()})
 }
 
-//fonction a faire. Pour calculer le score
+//Pour calculer le score
 function calculScore(div){
 	     if (div.classList.contains("red")){
 	        score=score+1;
@@ -184,7 +224,6 @@ function calculScore(div){
 	    }
 	}
 
-//fonction a faire. Appeler lorsque la personne click sur une div de couleur.
 //faire disparaitre la div + ajouter un au compteur + changement de position + gestion des pts en fonction des couleurs.
 function disapear(black){
 	var tabDiv=document.querySelectorAll("div");
@@ -213,6 +252,7 @@ function desingGame(){
 	var divDifficult=document.createElement("aside");
 	var divTimer=document.createElement("aside");
 	var divScore=document.createElement("aside");
+	var divfond_score=document.createElement("aside")
 
 	//assignation des class pour la mise en page
 	secGame.classList.add("game");
@@ -220,21 +260,22 @@ function desingGame(){
 	divGame.classList.add("divJeu");
 	divScoring.classList.add("scoring");
 	divDifficult.classList.add("difficult");
-	divTimer.classList.add("timer");
+	divTimer.classList.add("timer","vert");
 	divScore.classList.add("score");
+	divfond_score.classList.add("fond_score")
 
 	//injecte le html dans le body
 	document.body.appendChild(secGame);
 	secGame.appendChild(divScoring);
 	secGame.appendChild(divGame);
 	divScoring.appendChild(divDifficult);
-	divScoring.appendChild(divTimer);
+	divScoring.appendChild(divfond_score);
 	divScoring.appendChild(divScore);
+	divfond_score.appendChild(divTimer);
 
 	//rajoute les truc dans le html
-	console.log(_difficult);
 	divDifficult.textContent=_difficult;
-	divTimer.innerHTML="<progress value='100' min='0' max='100'></progress>"
+	divTimer.innerHTML="<span style=width:100%></span>"
 	divScore.textContent=score;
 	}
 
